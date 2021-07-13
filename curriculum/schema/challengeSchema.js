@@ -11,7 +11,7 @@ const fileJoi = Joi.object().keys({
   name: Joi.string(),
   editableRegionBoundaries: [Joi.array().items(Joi.number())],
   path: Joi.string(),
-  error: Joi.empty(),
+  error: Joi.valid(null),
   head: Joi.string().allow(''),
   tail: Joi.string().allow(''),
   seed: Joi.string().allow(''),
@@ -25,18 +25,18 @@ const schema = Joi.object()
     block: Joi.string().regex(slugRE),
     blockId: Joi.objectId(),
     challengeOrder: Joi.number(),
-    challengeType: Joi.number().min(0).max(11).required(),
+    removeComments: Joi.bool(),
+    challengeType: Joi.number().min(0).max(12).required(),
     checksum: Joi.number(),
     // __commentCounts is only used to test the comment replacement
     __commentCounts: Joi.object(),
     // TODO: require this only for normal challenges, not certs
     dashedName: Joi.string().regex(slugRE),
     description: Joi.when('challengeType', {
-      is: Joi.only([challengeTypes.step, challengeTypes.video]),
+      is: [challengeTypes.step, challengeTypes.video, challengeTypes.codeally],
       then: Joi.string().allow(''),
       otherwise: Joi.string().required()
     }),
-    fileName: Joi.string(),
     files: Joi.object().keys({
       indexcss: fileJoi,
       indexhtml: fileJoi,
@@ -44,10 +44,14 @@ const schema = Joi.object()
       indexjsx: fileJoi
     }),
     guideUrl: Joi.string().uri({ scheme: 'https' }),
-    helpCategory: Joi.only(['JavaScript', 'HTML-CSS', 'Python']),
+    helpCategory: Joi.valid(
+      'JavaScript',
+      'HTML-CSS',
+      'Python',
+      'Relational Databases'
+    ),
     videoUrl: Joi.string().allow(''),
     forumTopicId: Joi.number(),
-    helpRoom: Joi.string(),
     id: Joi.objectId().required(),
     instructions: Joi.string().allow(''),
     isComingSoon: Joi.bool(),
@@ -100,10 +104,14 @@ const schema = Joi.object()
     template: Joi.string().allow(''),
     time: Joi.string().allow(''),
     title: Joi.string().required(),
-    translationPending: Joi.bool().required()
+    translationPending: Joi.bool().required(),
+    url: Joi.when('challengeType', {
+      is: challengeTypes.codeally,
+      then: Joi.string().required()
+    })
   })
   .xor('helpCategory', 'isPrivate');
 
 exports.challengeSchemaValidator = () => {
-  return challenge => Joi.validate(challenge, schema);
+  return challenge => schema.validate(challenge);
 };

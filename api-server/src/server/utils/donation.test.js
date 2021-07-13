@@ -1,7 +1,4 @@
 /* eslint-disable camelcase */
-/* global describe it expect */
-/* global jest*/
-
 import axios from 'axios';
 import keys from '../../../../config/secrets';
 import {
@@ -24,10 +21,8 @@ jest.mock('axios');
 
 const verificationUrl = `https://api.sandbox.paypal.com/v1/notifications/verify-webhook-signature`;
 const tokenUrl = `https://api.sandbox.paypal.com/v1/oauth2/token`;
-const {
-  body: activationHookBody,
-  headers: activationHookHeaders
-} = mockActivationHook;
+const { body: activationHookBody, headers: activationHookHeaders } =
+  mockActivationHook;
 
 describe('donation', () => {
   describe('getAsyncPaypalToken', () => {

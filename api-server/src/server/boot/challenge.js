@@ -17,8 +17,8 @@ import { fixCompletedChallengeItem } from '../../common/utils';
 import { getChallenges } from '../utils/get-curriculum';
 import {
   getRedirectParams,
-  getRedirectBase,
-  normalizeParams
+  normalizeParams,
+  getPrefixedLandingPath
 } from '../utils/redirection';
 
 const log = debug('fcc:boot:challenges');
@@ -286,7 +286,7 @@ function projectCompleted(req, res, next) {
         })
       );
       return Observable.fromPromise(updatePromise).doOnNext(() => {
-        return res.send({
+        return res.json({
           alreadyCompleted,
           points: alreadyCompleted ? user.points : user.points + 1,
           completedDate: completedChallenge.completedDate
@@ -320,7 +320,7 @@ function backendChallengeCompleted(req, res, next) {
         })
       );
       return Observable.fromPromise(updatePromise).doOnNext(() => {
-        return res.send({
+        return res.json({
           alreadyCompleted,
           points: alreadyCompleted ? user.points : user.points + 1,
           completedDate: completedChallenge.completedDate
@@ -341,7 +341,7 @@ export function createRedirectToCurrentChallenge(
     const { user } = req;
     const { origin, pathPrefix } = getRedirectParams(req, normalizeParams);
 
-    const redirectBase = getRedirectBase(origin, pathPrefix);
+    const redirectBase = getPrefixedLandingPath(origin, pathPrefix);
     if (!user) {
       return res.redirect(redirectBase + '/learn');
     }

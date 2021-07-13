@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
-import { scriptLoader, scriptRemover } from '../../utils/scriptLoaders';
+import { scriptLoader, scriptRemover } from '../../utils/script-loaders';
 import { Loader } from '../../components/helpers';
 
 export class PayPalButtonScriptLoader extends Component {
@@ -25,7 +25,10 @@ export class PayPalButtonScriptLoader extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.isSubscription !== this.state.isSubscription) {
+    if (
+      prevProps.isSubscription !== this.state.isSubscription ||
+      prevProps.style !== this.props.style
+    ) {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ isSdkLoaded: false });
       this.loadScript(this.state.isSubscription, true);
@@ -34,11 +37,10 @@ export class PayPalButtonScriptLoader extends Component {
 
   loadScript(subscription, deleteScript) {
     if (deleteScript) scriptRemover('paypal-sdk');
-    let queries = `?client-id=${this.props.clientId}&disable-funding=credit,card,bancontact,blik,eps,giropay,ideal,mybank,p24,sepa,sofort,venmo`;
+    let queries = `?client-id=${this.props.clientId}&disable-funding=credit,bancontact,blik,eps,giropay,ideal,mybank,p24,sepa,sofort,venmo`;
     if (subscription) queries += '&vault=true&intent=subscription';
 
     scriptLoader(
-      'paypal-sdk',
       'paypal-sdk',
       true,
       `https://www.paypal.com/sdk/js${queries}`,
